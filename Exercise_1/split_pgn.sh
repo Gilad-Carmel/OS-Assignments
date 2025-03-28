@@ -32,7 +32,7 @@ split_games() {
     local game_no=0
     local file_name="${input_file##*/}" # removes everything in path but file name
     file_name="${file_name%.pgn}" # remove the ending
-    while IFS= read -r line; do
+    while read -r line; do
         if [[ $line = "[Event "* ]]; then
             ((game_no++))
             output_file="$dest_dir/${file_name}_${game_no}.pgn"
