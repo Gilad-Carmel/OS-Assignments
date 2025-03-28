@@ -26,9 +26,27 @@ ensure_directory_exists() {
     fi
 }
 
+split_games() {
+    local input_file=$1
+    local dest_dir=$2
+    local game_no=0
+    local file_name="${input_file##*/}" # removes everything in path but file name
+    file_name="${file_name%.pgn}" # remove the ending
+    while IFS= read -r line; do
+        if [[ $line = "[Event "* ]]; then
+            ((game_no++))
+            output_file="$dest_dir/${file_name}_${game_no}.pgn"
+            echo Saved game to "$output_file"
+        fi
+        echo "$line" >> "$output_file"
+    done < "$input_file"
+    echo "All games have been split and saved to '$dest_dir'."
+}
+
 # Main script logic
 validate_arguments "$@"
 INPUT_FILE=$1
 DEST_DIR=$2
 check_input_file "$INPUT_FILE"
 ensure_directory_exists "$DEST_DIR"
+split_games "$INPUT_FILE" "$DEST_DIR"
