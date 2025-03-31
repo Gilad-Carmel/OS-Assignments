@@ -110,15 +110,68 @@ move_piece() {
     local move_uci=$1
     local start_uci=${move_uci:0:2}
     local end_uci=${move_uci:2:2}
+    local promotion=${move_uci:4:1}
     read -r start_row start_col <<< "$(parse_uci_to_move "$start_uci")"
     read -r to_row to_col <<< "$(parse_uci_to_move "$end_uci")"
     local piece=${board[$start_row,$start_col]}
 
     board[$to_row,$to_col]=$piece
     board[$start_row,$start_col]="."
-    # implement promotion
 
-    # BONUS implement en passant and castling
+    # implement promotion
+    if [[ $promotion != "" ]]; then
+        if [[ $piece == "P" ]]; then
+            if [[ $promotion == "q" ]]; then
+                board[$to_row,$to_col]="Q"
+            elif [[ $promotion == "r" ]]; then
+                board[$to_row,$to_col]="R"
+            elif [[ $promotion == "b" ]]; then
+                board[$to_row,$to_col]="B"
+            elif [[ $promotion == "n" ]]; then
+                board[$to_row,$to_col]="N"
+            fi
+        elif [[ $piece == "p" ]]; then
+            if [[ $promotion == "q" ]]; then
+                board[$to_row,$to_col]="q"
+            elif [[ $promotion == "r" ]]; then
+                board[$to_row,$to_col]="r"
+            elif [[ $promotion == "b" ]]; then
+                board[$to_row,$to_col]="b"
+            elif [[ $promotion == "n" ]]; then
+                board[$to_row,$to_col]="n"
+            fi
+        fi
+    fi
+
+
+    # implement castling
+    if [[ $piece == "k" && $start_row == 0 && $start_col == 4 ]]; then
+        if [[ $to_row == 0 && $to_col == 6 ]]; then
+            board[0,5]="r"
+            board[0,7]="."
+        elif [[ $to_row == 0 && $to_col == 2 ]]; then
+            board[0,3]="r"
+            board[0,0]="."
+        fi
+    
+    elif [[ $piece == "K" && $start_col == 4 && $start_row == 7 ]]; then
+        if [[ $to_row == 7 && $to_col == 6 ]]; then
+            board[7,5]="R"
+            board[7,7]="."
+        elif [[ $to_row == 7 && $to_col == 2 ]]; then
+            board[7,3]="R"
+            board[7,0]="."
+        fi
+    fi
+
+    # implement en passant
+    if [[ ($piece == "p" || $piece == "P") && $start_col != "$to_col" && ${board[$to_row,$to_col]} == "." ]]; then
+        if [[ $piece == "p" ]]; then
+            board[$((to_row-1)),$to_col]="."
+        else
+            board[$((to_row+1)),$to_col]="."
+        fi
+    fi
 }
 
 
@@ -141,27 +194,24 @@ while true; do
     read key
     
     if [[ $key == "d" ]]; then
-        echo "dddd"
-        ((current_move++))
-        if [[ current_move -ge ${#moves_history[@]} ]]; then
+        if [[ $current_move -ge ${#moves_history[@]} ]]; then
+            echo ""
             echo "No more moves available."
-            ((current_move--))
             continue
         fi
         # move logic
         move_piece "${moves_history[$current_move]}"
+        ((current_move++))
 
     elif [[ $key == "a" ]]; then
-        echo "aaaa"
-        ((current_move--))
-        if ((current_move < 0)); then
-            ((current_move++))
+        if [[ $current_move -gt 0 ]]; then
+            ((current_move--))
+            init_board
+            
+            for ((m=0; m<current_move; m++)); do
+                move_piece "${moves_history[$m]}"
+            done
         fi
-        # move logic
-        while [[ $m -le $current_move ]]; do
-            move_piece "${moves_history[$m]}"
-            ((m++))
-        done
 
     elif [[ $key == "w" ]]; then
         current_move=0
@@ -169,25 +219,24 @@ while true; do
 
     elif [[ $key == "s" ]]; then
         current_move=0
-        while [[ $m -le ${#moves_history[@]} ]]; do
-            move_piece "${moves_history[$m]}"
-            ((m++))
+        init_board
+        while [[ $current_move -lt ${#moves_history[@]} ]]; do
+            move_piece "${moves_history[$current_move]}"
+            ((current_move++))
         done
         
     elif [[ $key == "q" ]]; then
-        echo ""    
+        echo ""
         echo "Exiting."
         echo "End of game."
         exit 0
     else
+        echo ""
         echo "Invalid key pressed: $key"
         continue
     fi
     echo ""
     echo "Move $current_move/${#moves_history[@]}"
     print_board
-
-
-
 
 done
