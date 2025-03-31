@@ -31,15 +31,41 @@ split_games() {
     local dest_dir=$2
     local game_no=0
     local file_name="${input_file##*/}" # removes everything in path but file name
-    file_name="${file_name%.pgn}" # remove the ending
-    while read -r line; do
+    local file_name="${file_name%.pgn}" # remove the ending
+    local output_file=""
+    local buffer=""
+    
+    while IFS= read -r line || [ -n "$line" ]; do
         if [[ $line = "[Event "* ]]; then
+            # check if buffer has content
+            if [ -n "$buffer" ]; then
+                buffer="${buffer%$'\n'}" # remove whitespaces
+                echo -n "$buffer" > "$output_file"
+            fi
+            
             ((game_no++))
             output_file="$dest_dir/${file_name}_${game_no}.pgn"
-            echo Saved game to "$output_file"
+            echo "Saved game to $output_file"
+            
+            buffer="$line"
+        elif [ -n "$output_file" ]; then
+            # add a newline before appending if buffer is not empty
+            if [ -n "$buffer" ]; then
+                buffer="$buffer"$'\n'"$line"
+            else
+                buffer="$line"
+            fi
         fi
-        echo "$line" >> "$output_file"
     done < "$input_file"
+    
+    # save the last game buffer
+    if [ -n "$buffer" ]; then
+        # remove empty line
+        buffer="${buffer%$'\n'}"
+        # write with no newline
+        echo -n "$buffer" > "$output_file"
+    fi
+    
     echo "All games have been split and saved to '$dest_dir'."
 }
 

@@ -2,6 +2,16 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash-Debug (select script from list of sh files)",
+            "cwd": "${workspaceFolder}",
+            "program": "${command:SelectScriptName}",
+            "terminalKind": "integrated",
+            "args": ["tester/filtered_games/Alburt/Alburt_340.pgn"]
+        },
+        
+        {
             "name": "C: Debug Active File",
             "type": "cppdbg",
             "request": "launch",
