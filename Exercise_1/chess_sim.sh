@@ -77,23 +77,51 @@ print_board() {
     for ((row=0; row<8; row++)); do
         echo -n "$((8-row)) " # print row number
         for ((col=0; col<8; col++)); do
-            echo -n "${board[$row,$col]}  " # print board content at (row,col)
+            echo -n "${board[$row,$col]} " # print board content at (row,col)
         done
         echo "$((8-row))"
     done
     echo "  a b c d e f g h"
 }
 
-# implement basic moves
+# implement move logic
+get_file_col() {
+    local file=$1
+    local file_mapping=("a" "b" "c" "d" "e" "f" "g" "h")
+    for ((i=0; i<8; i++)); do
+        if [[ ${file_mapping[$i]} == "$file" ]]; then
+            echo $i
+            return
+        fi
+    done
+}
 
-# move counter and interactive ("Press 'd' to move forward, 'a' to move back, 'w' to go to the start, 's' to go to the end, 'q' to quit:")
-# edge cases: 
-# - if d is pressed at the end print "No more moves available."
-# - if a is pressed at the beginning - nothing happens
+parse_uci_to_move() {
+    local uci_notation=$1
+    local file=${uci_notation:0:1}
+    local rank=${uci_notation:1:1}
+    local col=$(get_file_col "$file")
+    local row=$((8 - rank))
+    echo "$row $col"
+}
 
-# implement promotion
+# move
+move_piece() {
+    local move_uci=$1
+    local start_uci=${move_uci:0:2}
+    local end_uci=${move_uci:2:2}
+    read -r start_row start_col <<< "$(parse_uci_to_move "$start_uci")"
+    read -r to_row to_col <<< "$(parse_uci_to_move "$end_uci")"
+    local piece=${board[$start_row,$start_col]}
 
-# BONUS implement en passant and castling
+    board[$to_row,$to_col]=$piece
+    board[$start_row,$start_col]="."
+    # implement promotion
+
+    # BONUS implement en passant and castling
+}
+
+
 
 # main
 validate_arguments "$@"
@@ -103,12 +131,11 @@ read_pgn_file "$INPUT_FILE"
 # moves array
 read -a moves_history <<< "$uci"
 init_board
-print_board
 
 current_move=0
+echo "Move $current_move/${#moves_history[@]}"
+print_board
 while true; do
-    echo "Move $current_move/${#moves_history[@]}"
-    print_board
     echo -n "Press 'd' to move forward, 'a' to move back, 'w' to go to the start, 's' to go to the end, 'q' to quit:"
 
     read key
@@ -116,23 +143,49 @@ while true; do
     if [[ $key == "d" ]]; then
         echo "dddd"
         ((current_move++))
+        if [[ current_move -ge ${#moves_history[@]} ]]; then
+            echo "No more moves available."
+            ((current_move--))
+            continue
+        fi
+        # move logic
+        move_piece "${moves_history[$current_move]}"
+
     elif [[ $key == "a" ]]; then
         echo "aaaa"
         ((current_move--))
         if ((current_move < 0)); then
-            current_move=0
-            echo "No more moves available."
+            ((current_move++))
         fi
+        # move logic
+        while [[ $m -le $current_move ]]; do
+            move_piece "${moves_history[$m]}"
+            ((m++))
+        done
+
     elif [[ $key == "w" ]]; then
-        echo "wwww"
+        current_move=0
+        init_board
+
     elif [[ $key == "s" ]]; then
-        echo "ssss"
+        current_move=0
+        while [[ $m -le ${#moves_history[@]} ]]; do
+            move_piece "${moves_history[$m]}"
+            ((m++))
+        done
+        
     elif [[ $key == "q" ]]; then
-        echo "qqqq"
-        break
+        echo ""    
+        echo "Exiting."
+        echo "End of game."
+        exit 0
     else
         echo "Invalid key pressed: $key"
+        continue
     fi
+    echo ""
+    echo "Move $current_move/${#moves_history[@]}"
+    print_board
 
 
 
