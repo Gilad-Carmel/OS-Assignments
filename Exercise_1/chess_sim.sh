@@ -30,7 +30,6 @@ read_pgn_file() {
             content+="$line"$'\s'
         fi
     done < "$input_file"
-    echo ""
     uci=$(python3 parse_moves.py "$content")
 
 }
@@ -189,13 +188,12 @@ current_move=0
 echo "Move $current_move/${#moves_history[@]}"
 print_board
 while true; do
-    echo -n "Press 'd' to move forward, 'a' to move back, 'w' to go to the start, 's' to go to the end, 'q' to quit:"
+    echo -n "Press 'd' to move forward, 'a' to move back, 'w' to go to the start, 's' to go to the end, 'q' to quit: "
 
     read key
     
     if [[ $key == "d" ]]; then
         if [[ $current_move -ge ${#moves_history[@]} ]]; then
-            echo ""
             echo "No more moves available."
             continue
         fi
@@ -226,16 +224,13 @@ while true; do
         done
         
     elif [[ $key == "q" ]]; then
-        echo ""
         echo "Exiting."
         echo "End of game."
         exit 0
     else
-        echo ""
         echo "Invalid key pressed: $key"
         continue
     fi
-    echo ""
     echo "Move $current_move/${#moves_history[@]}"
     print_board
 
