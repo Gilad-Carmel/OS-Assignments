@@ -16,7 +16,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/${fileBasenameNoExtension}",
-            "args": ["XD"], // You can add default arguments here
+            "args": ["A", "B"], // You can add default arguments here
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

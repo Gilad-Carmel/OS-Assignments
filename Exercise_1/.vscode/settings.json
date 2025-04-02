@@ -4,7 +4,8 @@
     "C_Cpp.formatting": "default",
     "C_Cpp.autocomplete": "default",
     "files.associations": {
-        "*.c": "c"
+        "*.c": "c",
+        "errno.h": "c"
     },
     "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.defaultProfile.osx": "zsh",
