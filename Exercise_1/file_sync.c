@@ -18,8 +18,7 @@ int directory_exists(const char *path)
     struct stat path_stat;
     if ((stat(path, &path_stat) != 0))
     {
-        perror("stat failed");
-        exit(1);
+        return 0;
     }
     return S_ISDIR(path_stat.st_mode);
 }
@@ -65,8 +64,11 @@ int file_exists(const char *path)
 
 void create_directory(const char *path)
 {
-    char *argv[3] = { "mkdir", "-p", path, NULL };
-    run_execvp(argv);
+    if (mkdir(path, 0755) != 0) {
+        perror("mkdir failed");
+        exit(1);
+    }
+    printf("Created directory: %s\n", path);
 }
 
 void copy_file(const char *file1, const char *file2)
