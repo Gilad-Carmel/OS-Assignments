@@ -68,7 +68,7 @@ void create_directory(const char *path)
         perror("mkdir failed");
         exit(1);
     }
-    printf("Created directory: %s\n", path);
+    printf("Created destination directory '%s'.\n", path);
 }
 
 void copy_file(const char *file1, const char *file2)
@@ -156,6 +156,8 @@ void dir_sync(const char *source, const char* dest) {
     int file_count = 0;
     DIR *dir;
     struct stat file_stat;
+
+    printf("Synchronizing from %s to %s\n", source, dest);
     
     dir = opendir(source);
     if (!dir) {
@@ -219,14 +221,25 @@ void dir_sync(const char *source, const char* dest) {
     for (int i = 0; i < file_count; i++) {
         free(filenames[i]);
     }
+
+    printf("Synchronization complete.\n");
 }
 
 int main(int argc, char const *argv[])
 {
+    // print current working directory
+    char cwd[MAX_PATH_LENGTH];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        printf("Current working directory: %s\n", cwd);
+    } else {
+        perror("getcwd failed");
+        exit(1);
+    }
+
     // validate arguments
     if (argc != 3)
     {
-        printf("Usage: %s <source_directory> <destination_directory>\n", argv[0]);
+        printf("Usage: file_sync <source_directory> <destination_directory>\n");
         exit(1);
     }
    
@@ -239,7 +252,7 @@ int main(int argc, char const *argv[])
     // check if source directory exists
     if (!directory_exists(source_directory))
     {
-        printf("Source directory does not exist: %s\n", source_directory);
+        printf("Error: Source directory '%s' does not exist.\n", source_directory);
         exit(1);
     }
 
@@ -249,17 +262,14 @@ int main(int argc, char const *argv[])
         create_directory(destination_directory);
     }
 
-    // print current working directory
-    char cwd[MAX_PATH_LENGTH];
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        printf("Current working directory: %s\n", cwd);
-    } else {
-        perror("getcwd failed");
-        exit(1);
-    }
+    // concatenate cwd to source and destination directories
+    char source_path[MAX_PATH_LENGTH];
+    char dest_path[MAX_PATH_LENGTH];
+    snprintf(source_path, sizeof(source_path), "%s/%s", cwd, source_directory);
+    snprintf(dest_path, sizeof(dest_path), "%s/%s", cwd, destination_directory);
 
     // sync files
-    dir_sync(source_directory, destination_directory);
+    dir_sync(source_path, dest_path);
     
 
 }
