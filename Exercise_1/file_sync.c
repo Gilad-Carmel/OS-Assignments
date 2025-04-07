@@ -64,10 +64,8 @@ int file_exists(const char *path)
 
 void create_directory(const char *path)
 {
-    if (mkdir(path, 0755) != 0) {
-        perror("mkdir failed");
-        exit(1);
-    }
+    char *argv[4] = { "mkdir", "-p", (char *)path, NULL };
+    run_execvp(argv);
     printf("Created destination directory '%s'.\n", path);
 }
 
@@ -265,8 +263,23 @@ int main(int argc, char const *argv[])
     // concatenate cwd to source and destination directories
     char source_path[MAX_PATH_LENGTH];
     char dest_path[MAX_PATH_LENGTH];
-    snprintf(source_path, sizeof(source_path), "%s/%s", cwd, source_directory);
-    snprintf(dest_path, sizeof(dest_path), "%s/%s", cwd, destination_directory);
+    if (source_directory[0] != '/')
+    {
+        snprintf(source_path, sizeof(source_path), "%s/%s", cwd, source_directory);
+    }
+    else
+    {
+        snprintf(source_path, sizeof(source_path), "%s", source_directory);
+    }
+    
+    if (destination_directory[0] != '/')
+    {
+        snprintf(dest_path, sizeof(dest_path), "%s/%s", cwd, destination_directory);
+    }
+    else
+    {
+        snprintf(dest_path, sizeof(dest_path), "%s", destination_directory);
+    }
 
     // sync files
     dir_sync(source_path, dest_path);
