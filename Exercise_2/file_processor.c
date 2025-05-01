@@ -30,7 +30,6 @@ int read_data(FILE* file, int start, int end, FILE* output_file) {
 
     fwrite(buffer, 1, bytes_read, output_file);
     fprintf(output_file, "\n"); // add newline
-    printf("Read %zu bytes from %d to %d\n", bytes_read, start, end);
     return 0;
 }
 
@@ -68,7 +67,6 @@ int write_data(FILE* file, int offset, const char* data) {
     }
     free(buffer);
 
-    printf("Wrote %zu bytes at offset %d\n", bytes_written, offset);
     return 0;
 }
 
