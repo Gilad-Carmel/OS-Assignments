@@ -1,22 +1,3 @@
-// read specific ranges
-
-// write new data at a given offset while preserving the rest of the file
-
-// process requests from input file
-
-// handle edge cases:
-// read/write outside the bounds of the file (on write end of file is ok)
-
-// data file - starts wtih 256 bytes mix of uppercase, lowercase and digits
-
-// requests file - contains a series of commands (R,W,Q)
-
-// R <start> <end> - read from start to end
-// W <offset> <data> - write data at offset
-// Q - quit
-
-// read results file - output of R commands
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +6,7 @@
 
 #define BUFFER_SIZE 256
 
+// R <start> <end> command
 int read_data(FILE* file, int start, int end, FILE* output_file) {
 
     // check if start and end are within bounds (0 <= start <= end < file size)
@@ -52,6 +34,7 @@ int read_data(FILE* file, int start, int end, FILE* output_file) {
     return 0;
 }
 
+// W <offset> <data> command
 int write_data(FILE* file, int offset, const char* data) {
     // check if offset is within bounds (0 <= offset < file size)
     fseek(file, 0, SEEK_END);
