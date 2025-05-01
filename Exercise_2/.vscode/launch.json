@@ -16,7 +16,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/${fileBasenameNoExtension}",
-            "args": ["G1"], // You can add default arguments here
+            "args": ["data.txt", "requests.txt"], // You can add default arguments here
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
