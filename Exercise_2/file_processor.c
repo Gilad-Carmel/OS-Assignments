@@ -12,8 +12,8 @@ int read_data(FILE* file, int start, int end, FILE* output_file) {
     // check if start and end are within bounds (0 <= start <= end < file size)
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
-    if (start < 0 || end < start || end >= file_size) {
-        fprintf(stderr, "Invalid read range: %d to %d\n", start, end);
+    if (start < 0 || end < start || end > file_size) {
+        // fprintf(stderr, "Invalid read range: %d to %d\n", start, end);
         return -1;
     }
     fseek(file, start, SEEK_SET);
