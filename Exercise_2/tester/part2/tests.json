@@ -1,20 +1,56 @@
 [
     {
-        "data": "1234567890abcdefghij",
-        "requests": "R 2 15\nR 0 2\nW 100 OMERTHEKING\nW 10 HEMI\nQ",
-        "data_changed": "1234567890HEMIabcdefghij",
-        "read_results": "34567890abcdef\n123"
+        "data": "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+        "requests": "W 0 START\nR 0 4\nQ",
+        "data_changed": "STARTABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+        "read_results": "START"
     },
     {
-        "data": "1234567890abcdefghij",
-        "requests": "W 10 HelloWorld\nR 5 29\nW 100 InsertHere\nR 90 150\nW 110 XYZABC\nR 195 220\nW 20 LongTextHere\nQ",
-        "data_changed": "1234567890HelloWorldLongTextHereabcdefghij",
-        "read_results": "67890HelloWorldabcdefghij"
+        "data": "ABCDEFGHIJ",
+        "requests": "W 5 MID\nR 0 9\nQ",
+        "data_changed": "ABCDEMIDFGHIJ",
+        "read_results": "ABCDEMIDFG"
     },
     {
-        "data": "1234567890abcdefghij",
-        "requests": "R 2 2\nW 9 NEVERGONNAGIVEYOUUP\nR 0 25\nW 0 98\nW 10 WINDOWSISTRASH\nR 2 30\nQ",
-        "data_changed": "9812345678WINDOWSISTRASH9NEVERGONNAGIVEYOUUP0abcdefghij",
-        "read_results": "3\n123456789NEVERGONNAGIVEYOU\n12345678WINDOWSISTRASH9NEVERG"
+        "data": "1234567890",
+        "requests": "W 10 END\nR 10 12\nQ",
+        "data_changed": "1234567890END",
+        "read_results": "END"
+    },
+    {
+        "data": "AAAABBBBCCCC",
+        "requests": "W 4 XXXX\nR 0 11\nQ",
+        "data_changed": "AAAAXXXXBBBBCCCC",
+        "read_results": "AAAAXXXXBBBB"
+    },
+    {
+        "data": "abcdefghij",
+        "requests": "R 2 20\nQ",
+        "data_changed": "abcdefghij",
+        "read_results": ""
+    },
+    {
+        "data": "abcdefghij",
+        "requests": "W 20 OOPS\nQ",
+        "data_changed": "abcdefghij",
+        "read_results": ""
+    },
+    {
+        "data": "AAAAAABBBBBBCCCCCC",
+        "requests": "W 6 CCC\nW 9 DDD\nR 6 14\nQ",
+        "data_changed": "AAAAAACCCDDDBBBBBBCCCCCC",
+        "read_results": "CCCDDDBBB"
+    },
+    {
+        "data": "X",
+        "requests": "R 0 0\nW 1 END\nR 0 3\nQ",
+        "data_changed": "XEND",
+        "read_results": "X\nXEND"
+    },
+    {
+        "data": "123456789",
+        "requests": "W 0 ONE\nW 3 TWO\nW 6 THREE\nR 0 20\nQ",
+        "data_changed": "ONETWOTHREE123456789",
+        "read_results": "ONETWOTHREE123456789"
     }
 ]
