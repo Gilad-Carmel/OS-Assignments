@@ -7,14 +7,15 @@
 #define DELIVERY_SIGNAL SIGUSR2
 #define DOORBELL_SIGNAL SIGPIPE
 
-#define EMAIL_OUTCOME 
-
 // handlers
 
 void handle_signal(int signum) {
     if (signum == EMAIL_SIGNAL) {
-    } else if (signum == REMINDER_SIGNAL) {
+        printf("[Outcome:] The TA announced: Everyone get 100 on the exercise!\n");
+    } else if (signum == DELIVERY_SIGNAL) {
+        printf("[Outcome:] You picked it up just in time.\n");
     } else if (signum == DOORBELL_SIGNAL) {
+        printf("[Outcome:] Food delivery is here.\n");
     }
 }
 
@@ -36,22 +37,23 @@ void printRoundStart(int roundNumber) {
 }
 void printPendingDistractions() {
     printf("──────────────────────────────────────────────\n");
-    printf("        Checking pending distractions...\n");
+    printf("        Checking pending distractions...      \n");
     printf("──────────────────────────────────────────────\n");
 }
 void printBackToFocusMode() {
     printf("──────────────────────────────────────────────\n");
-    printf("             Back to Focus Mode.\n");
+    printf("             Back to Focus Mode.              \n");
     printf("══════════════════════════════════════════════\n");
 }
 
 void printDistractionMenu() {
+    printf("\n");
     printf("Simulate a distraction:\n");
     printf("  1 = Email notification\n");
     printf("  2 = Reminder to pick up delivery\n");
     printf("  3 = Doorbell Ringing\n");
     printf("  q = Quit\n");
-    printf(">> \n\n");
+    printf(">> ");
 } 
 
 // generic send signal function
@@ -62,19 +64,6 @@ void sendSignal(int sig) {
 }
 
 
-void sendEmailSignal() {
-    printf("Email notification sent.\n");
-    sendSignal(EMAIL_SIGNAL);
-}
-void sendDeliverySignal() {
-    printf("Reminder to pick up delivery sent.\n");
-    sendSignal(DELIVERY_SIGNAL);
-}
-void sendDoorbellSignal() {
-    printf("Doorbell ringing signal sent.\n");
-    sendSignal(DOORBELL_SIGNAL);
-}
-
 void distractionMenu(int duration) {
     char choice;
     for (int i = 0; i < duration; i++) {
@@ -82,19 +71,18 @@ void distractionMenu(int duration) {
         scanf(" %c", &choice);
         switch (choice) {
             case '1':
-                sendEmailSignal();
+                sendSignal(EMAIL_SIGNAL);
                 break;
             case '2':
-                sendDeliverySignal();
+                sendSignal(DELIVERY_SIGNAL);
                 break;
             case '3':
-                sendDoorbellSignal();
+                sendSignal(DOORBELL_SIGNAL);
                 break;
             case 'q':
-                printf("Exiting distraction menu.\n");
                 return;
             default:
-                printf("Invalid choice. Please try again.\n");
+                printf("Invalid choice.\n");
         }
     }
     
@@ -113,49 +101,65 @@ void startFocusMode() {
     }
 }
 
-void exitFocusMode() {
+void unblock_signal(int signum) {
     sigset_t sigset;
     sigemptyset(&sigset);
-    sigaddset(&sigset, EMAIL_SIGNAL);
-    sigaddset(&sigset, DELIVERY_SIGNAL);
-    sigaddset(&sigset, DOORBELL_SIGNAL);
+    sigaddset(&sigset, signum);
 
     if (sigprocmask(SIG_UNBLOCK, &sigset, NULL) != 0) {
         perror("Failed to unblock signals");
     }
 }
 
-void check_pending(int sig, char *signame) {
-    sigset_t sigset;
-
-    if (sigpending(&sigset) != 0) {
-        perror("sigpending() error\n");
-    } else if (sigismember(&sigset, sig)) {
-        printf("a %s signal is pending\n", signame);
+int check_member(int sig, sigset_t *sigset) {
+    if (sigismember(sigset, sig)) {
+        return 1; // Signal is blocked
     } else {
-        printf("no %s signals are pending\n", signame);
+        return 0; // Signal is not blocked
     }
+
 }
 
 void pendingPhase() {
     printPendingDistractions();
-    check_pending(EMAIL_SIGNAL, "email");
-    check_pending(DELIVERY_SIGNAL, "delivery");
-    check_pending(DOORBELL_SIGNAL, "doorbell");
+    sigset_t sigset;
+    int distraction_count = 0;
+    if (sigpending(&sigset) != 0) {
+        perror("sigpending() error\n");
+    }
+    if (check_member(EMAIL_SIGNAL, &sigset)) {
+        printf(" - Email notification is waiting.\n");
+        unblock_signal(EMAIL_SIGNAL);
+        distraction_count++;
+    }
+    if (check_member(DELIVERY_SIGNAL, &sigset)) {
+        printf(" - You have a reminder to pick up your delivery.\n");
+        unblock_signal(DELIVERY_SIGNAL);
+        distraction_count++;
+    }
+    if (check_member(DOORBELL_SIGNAL, &sigset)) {
+        printf(" - The doorbell is ringing.\n");
+        unblock_signal(DOORBELL_SIGNAL);
+        distraction_count++;
+    }
+
+    if (distraction_count == 0) {
+        printf("No distractions reached you this round.\n");
+    }
+    
 }
 
 
 void runFocusMode(int numOfRounds, int duration) {
-    
+    setupSignalHandlers();
     printf("Entering Focus Mode. All distractions are blocked.\n");
     for (int i = 0; i < numOfRounds; i++) {
         startFocusMode();
         printRoundStart(i + 1);
         distractionMenu(duration);
-        exitFocusMode();
         pendingPhase();
         // sleep(duration);
         printBackToFocusMode();
     }
-    printf("Focus Mode completed.\n");
+    printf("\nFocus Mode complete. All distractions are now unblocked.\n");
 }
