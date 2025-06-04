@@ -5,7 +5,8 @@
     "C_Cpp.autocomplete": "default",
     "files.associations": {
         "*.c": "c",
-        "errno.h": "c"
+        "errno.h": "c",
+        "signal.h": "c"
     },
     "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.defaultProfile.osx": "zsh",
