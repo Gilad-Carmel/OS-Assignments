@@ -1,21 +1,25 @@
-#define _POSIX_C_SOURCE 200809L
 #include <signal.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 
 #define EMAIL_SIGNAL SIGUSR1
 #define DELIVERY_SIGNAL SIGUSR2
 #define DOORBELL_SIGNAL SIGPIPE
 
+void async_safe_write(const char *msg) {
+    write(STDERR_FILENO, msg, strlen(msg));
+}
+
 // handlers
 
 void handle_signal(int signum) {
     if (signum == EMAIL_SIGNAL) {
-        printf("[Outcome:] The TA announced: Everyone get 100 on the exercise!\n");
+        async_safe_write("[Outcome:] The TA announced: Everyone get 100 on the exercise!\n");
     } else if (signum == DELIVERY_SIGNAL) {
-        printf("[Outcome:] You picked it up just in time.\n");
+        async_safe_write("[Outcome:] You picked it up just in time.\n");
     } else if (signum == DOORBELL_SIGNAL) {
-        printf("[Outcome:] Food delivery is here.\n");
+        async_safe_write("[Outcome:] Food delivery is here.\n");
     }
 }
 
