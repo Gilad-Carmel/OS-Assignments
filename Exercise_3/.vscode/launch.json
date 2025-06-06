@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/${fileBasenameNoExtension}",
-            "args": ["Focus-Mode", "5", "3"], // You can add default arguments here
+            "args": ["CPU-Scheduler", "CPU-Scheduler-Tests/processes1.csv", "2"], // You can add default arguments here
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
